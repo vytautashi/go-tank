@@ -24,6 +24,10 @@ Things you need to install.
 2. Run game-client executable in `/game-client` directory
 3. Access game using browser via url http://localhost:8081 _(open on multiple tabs to spawn multiple players)_
 
+### Game Controls
+* Movement - keyboard arrows (up, down, left, right)
+* Fire gun - spacebar
+
 ## More Info
 This repository demonstrates basic created 'io game' using _Golang_ and _Phaser_. Player can move and fire bullets which collides with other players. Its not blooted with a lot of functionality in order to make it simple and easy to understand.
 
