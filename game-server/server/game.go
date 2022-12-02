@@ -45,7 +45,7 @@ func (g *Game) updatePlayersActions() {
 	for id, p := range g.players {
 		if p.fireGun {
 			p.bulletRecoil++
-			if p.bulletRecoil >= 15 {
+			if p.bulletRecoil >= 10 {
 				p.fireGun = false
 				p.bulletRecoil = 0
 				g.bulletManager.addBullet(id, p)
