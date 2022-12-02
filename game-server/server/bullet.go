@@ -6,7 +6,7 @@ const (
 	// State of bullet
 	bulletExploded = -1
 
-	// 	position x (2 bytes) + y (2 bytes) = 4 bytes
+	// position x (2 bytes) + y (2 bytes) = 4 bytes
 	bulletSizeInBytes = 4
 )
 
@@ -84,7 +84,7 @@ func (bm *BulletManager) updateBulletsCollision(players map[uint32]*Player) {
 				continue
 			}
 
-			// Checks if  player is owner of bullet
+			// Checks if player is owner of bullet
 			if bullet.playerID == id {
 				continue
 			}
