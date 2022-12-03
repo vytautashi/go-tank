@@ -134,6 +134,205 @@ func TestUpdateBulletsMovement(t *testing.T) {
 	}
 }
 
+// Test: updateBulletsCollision()
+func TestUpdateBulletsCollision(t *testing.T) {
+	bulletManager := newBulletManager()
+	players := make(map[uint32]*Player)
+	players[1] = &Player{x: 50, y: 100}
+	players[2] = &Player{x: 200, y: 300}
+
+	bulletManager.bullets = append(bulletManager.bullets,
+		Bullet{lifeTime: 100, x: 29, y: 100},
+		Bullet{lifeTime: 100, x: 71, y: 100},
+		Bullet{lifeTime: 100, x: 50, y: 79},
+		Bullet{lifeTime: 100, x: 50, y: 121},
+	)
+
+	// 1: No collisions
+	bulletManager.updateBulletsCollision(players)
+	expect := []Bullet{
+		{lifeTime: 100, x: 29, y: 100},
+		{lifeTime: 100, x: 71, y: 100},
+		{lifeTime: 100, x: 50, y: 79},
+		{lifeTime: 100, x: 50, y: 121},
+	}
+	result := bulletManager.bullets
+	if !reflect.DeepEqual(result, expect) {
+		t.Fatalf(`result = %v, expect = %v`, result, expect)
+	}
+	expect2 := map[uint32]*Player{
+		1: {x: 50, y: 100},
+		2: {x: 200, y: 300},
+	}
+	result2 := players
+	if !reflect.DeepEqual(result2, expect2) {
+		t.Fatalf(`result = %v, expect = %v`, result2, expect2)
+	}
+
+	// 2: Player collides x left bullet
+	players[1] = &Player{x: 49, y: 100}
+	bulletManager.updateBulletsCollision(players)
+	expect = []Bullet{
+		{lifeTime: -1, x: 29, y: 100},
+		{lifeTime: 100, x: 71, y: 100},
+		{lifeTime: 100, x: 50, y: 79},
+		{lifeTime: 100, x: 50, y: 121},
+	}
+	result = bulletManager.bullets
+	if !reflect.DeepEqual(result, expect) {
+		t.Fatalf(`result = %v, expect = %v`, result, expect)
+	}
+	expect2 = map[uint32]*Player{
+		1: {x: 0, y: 0, ymove: 2},
+		2: {x: 200, y: 300},
+	}
+	result2 = players
+	if !reflect.DeepEqual(result2, expect2) {
+		t.Fatalf(`result = %v, expect = %v`, result2, expect2)
+	}
+
+	// 3: Player collides x right bullet
+	players[1] = &Player{x: 51, y: 100}
+	bulletManager.updateBulletsCollision(players)
+	expect = []Bullet{
+		{lifeTime: -1, x: 29, y: 100},
+		{lifeTime: -1, x: 71, y: 100},
+		{lifeTime: 100, x: 50, y: 79},
+		{lifeTime: 100, x: 50, y: 121},
+	}
+	result = bulletManager.bullets
+	if !reflect.DeepEqual(result, expect) {
+		t.Fatalf(`result = %v, expect = %v`, result, expect)
+	}
+	expect2 = map[uint32]*Player{
+		1: {x: 0, y: 0, ymove: 2},
+		2: {x: 200, y: 300},
+	}
+	result2 = players
+	if !reflect.DeepEqual(result2, expect2) {
+		t.Fatalf(`result = %v, expect = %v`, result2, expect2)
+	}
+
+	// 4: Player collides y bottom bullet
+	players[1] = &Player{x: 50, y: 99}
+	bulletManager.updateBulletsCollision(players)
+	expect = []Bullet{
+		{lifeTime: -1, x: 29, y: 100},
+		{lifeTime: -1, x: 71, y: 100},
+		{lifeTime: -1, x: 50, y: 79},
+		{lifeTime: 100, x: 50, y: 121},
+	}
+	result = bulletManager.bullets
+	if !reflect.DeepEqual(result, expect) {
+		t.Fatalf(`result = %v, expect = %v`, result, expect)
+	}
+	expect2 = map[uint32]*Player{
+		1: {x: 0, y: 0, ymove: 2},
+		2: {x: 200, y: 300},
+	}
+	result2 = players
+	if !reflect.DeepEqual(result2, expect2) {
+		t.Fatalf(`result = %v, expect = %v`, result2, expect2)
+	}
+
+	// 5: Player collides y top bullet
+	players[1] = &Player{x: 50, y: 101}
+	bulletManager.updateBulletsCollision(players)
+	expect = []Bullet{
+		{lifeTime: -1, x: 29, y: 100},
+		{lifeTime: -1, x: 71, y: 100},
+		{lifeTime: -1, x: 50, y: 79},
+		{lifeTime: -1, x: 50, y: 121},
+	}
+	result = bulletManager.bullets
+	if !reflect.DeepEqual(result, expect) {
+		t.Fatalf(`result = %v, expect = %v`, result, expect)
+	}
+	expect2 = map[uint32]*Player{
+		1: {x: 0, y: 0, ymove: 2},
+		2: {x: 200, y: 300},
+	}
+	result2 = players
+	if !reflect.DeepEqual(result2, expect2) {
+		t.Fatalf(`result = %v, expect = %v`, result2, expect2)
+	}
+
+	// 6: Same bullet must not collide/explode twice
+	bulletManager.bullets[0] = Bullet{lifeTime: 100, x: 29, y: 100}
+	players[1] = &Player{x: 30, y: 100}
+	players[2] = &Player{x: 30, y: 100}
+	bulletManager.updateBulletsCollision(players)
+	expect = []Bullet{
+		{lifeTime: -1, x: 29, y: 100},
+		{lifeTime: -1, x: 71, y: 100},
+		{lifeTime: -1, x: 50, y: 79},
+		{lifeTime: -1, x: 50, y: 121},
+	}
+	result = bulletManager.bullets
+	if !reflect.DeepEqual(result, expect) {
+		t.Fatalf(`result = %v, expect = %v`, result, expect)
+	}
+	expect2 = map[uint32]*Player{
+		1: {x: 0, y: 0, ymove: 2},
+		2: {x: 30, y: 100},
+	}
+	result2 = players
+	if !reflect.DeepEqual(result2, expect2) {
+		t.Fatalf(`result = %v, expect = %v`, result2, expect2)
+	}
+
+	// 7: bullet do not collide with its owner
+	bulletManager.bullets[0] = Bullet{playerID: 1, lifeTime: 100, x: 29, y: 100}
+	players[1] = &Player{x: 30, y: 100}
+	players[2] = &Player{x: 200, y: 300}
+	bulletManager.updateBulletsCollision(players)
+	expect = []Bullet{
+		{playerID: 1, lifeTime: 100, x: 29, y: 100},
+		{lifeTime: -1, x: 71, y: 100},
+		{lifeTime: -1, x: 50, y: 79},
+		{lifeTime: -1, x: 50, y: 121},
+	}
+	result = bulletManager.bullets
+	if !reflect.DeepEqual(result, expect) {
+		t.Fatalf(`result = %v, expect = %v`, result, expect)
+	}
+	expect2 = map[uint32]*Player{
+		1: {x: 30, y: 100},
+		2: {x: 200, y: 300},
+	}
+	result2 = players
+	if !reflect.DeepEqual(result2, expect2) {
+		t.Fatalf(`result = %v, expect = %v`, result2, expect2)
+	}
+
+	// 8: Many(2) collisions
+	bulletManager.bullets[0] = Bullet{lifeTime: 100, x: 30, y: 100}
+	bulletManager.bullets[1] = Bullet{lifeTime: 100, x: 30, y: 100}
+	bulletManager.bullets[2] = Bullet{lifeTime: 100, x: 1000, y: 1000}
+	bulletManager.bullets[3] = Bullet{lifeTime: 100, x: 200, y: 300}
+	players[1] = &Player{x: 30, y: 100}
+	players[2] = &Player{x: 200, y: 300}
+	bulletManager.updateBulletsCollision(players)
+	expect = []Bullet{
+		{lifeTime: -1, x: 30, y: 100},
+		{lifeTime: 100, x: 30, y: 100},
+		{lifeTime: 100, x: 1000, y: 1000},
+		{lifeTime: -1, x: 200, y: 300},
+	}
+	result = bulletManager.bullets
+	if !reflect.DeepEqual(result, expect) {
+		t.Fatalf(`result = %v, expect = %v`, result, expect)
+	}
+	expect2 = map[uint32]*Player{
+		1: {x: 0, y: 0, ymove: 2},
+		2: {x: 0, y: 0, ymove: 2},
+	}
+	result2 = players
+	if !reflect.DeepEqual(result2, expect2) {
+		t.Fatalf(`result = %v, expect = %v`, result2, expect2)
+	}
+}
+
 // Test: removeBullets()
 func TestRemoveBullets(t *testing.T) {
 	// 0: Initial setup

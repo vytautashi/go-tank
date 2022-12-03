@@ -97,6 +97,7 @@ func (bm *BulletManager) updateBulletsCollision(players map[uint32]*Player) {
 
 				bm.bullets[i].lifeTime = bulletExploded
 				players[id] = NewPlayer()
+				break
 			}
 		}
 	}
