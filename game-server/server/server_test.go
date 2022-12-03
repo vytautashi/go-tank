@@ -57,3 +57,89 @@ func TestClientRegister(t *testing.T) {
 		t.Fatalf(`result = %v, expect = %v`, result, expect)
 	}
 }
+
+// Test: removeDisconnectedClients()
+func TestRemoveDisconnectedClients(t *testing.T) {
+	// 0: Initial setup
+	s := New(100)
+	// Player 1
+	s.clients[1] = nil
+	s.game.players[1] = nil
+	// Player 2
+	s.clients[2] = nil
+	s.game.players[2] = nil
+	// Player 3
+	s.clients[3] = nil
+	s.game.players[3] = nil
+	s.nowPlayers = 3
+
+	expect := 3
+	result := len(s.clients)
+	if result != expect {
+		t.Fatalf(`result = %v, expect = %v`, result, expect)
+	}
+	expect = 3
+	result = len(s.game.players)
+	if result != expect {
+		t.Fatalf(`result = %v, expect = %v`, result, expect)
+	}
+	expect2 := true
+	_, result2 := s.clients[2]
+	if result2 != expect2 {
+		t.Fatalf(`result2 = %v, expect2 = %v`, result2, expect2)
+	}
+	expect2 = true
+	_, result2 = s.game.players[2]
+	if result2 != expect2 {
+		t.Fatalf(`result2 = %v, expect2 = %v`, result2, expect2)
+	}
+
+	// 1: Deletes player/client with id:2
+	s.deleteClients <- 2
+	s.removeDisconnectedClients()
+	expect = 2
+	result = len(s.clients)
+	if result != expect {
+		t.Fatalf(`result = %v, expect = %v`, result, expect)
+	}
+	expect = 2
+	result = len(s.game.players)
+	if result != expect {
+		t.Fatalf(`result = %v, expect = %v`, result, expect)
+	}
+	expect = 2
+	result = s.nowPlayers
+	if result != expect {
+		t.Fatalf(`result = %v, expect = %v`, result, expect)
+	}
+	expect2 = false
+	_, result2 = s.clients[2]
+	if result2 != expect2 {
+		t.Fatalf(`result2 = %v, expect2 = %v`, result2, expect2)
+	}
+	expect2 = false
+	_, result2 = s.game.players[2]
+	if result2 != expect2 {
+		t.Fatalf(`result2 = %v, expect2 = %v`, result2, expect2)
+	}
+
+	// 2: Deletes 2 players/clients
+	s.deleteClients <- 1
+	s.deleteClients <- 3
+	s.removeDisconnectedClients()
+	expect = 0
+	result = len(s.clients)
+	if result != expect {
+		t.Fatalf(`result = %v, expect = %v`, result, expect)
+	}
+	expect = 0
+	result = len(s.game.players)
+	if result != expect {
+		t.Fatalf(`result = %v, expect = %v`, result, expect)
+	}
+	expect = 0
+	result = s.nowPlayers
+	if result != expect {
+		t.Fatalf(`result = %v, expect = %v`, result, expect)
+	}
+}
